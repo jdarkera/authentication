@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 
-app.use(express.static(_dirname));
+app.use(express.static(__dirname));
 
 const bodyParser = require('body-parser');
 const expressSession = require('express-session') ({
@@ -24,25 +24,25 @@ const passport = require('passport');
 app.use(passport.initialize());
 app.use(passport.session());
 /* Mangoose Set Up */
-const mangoose = require('mangoose');
+const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose'); 
-const { Mongoose } = require('mongoose');
+const {Mongoose} = require('mongoose');
 
 /*connect to our database
 using mongoose.connect and give it the path to our database */
 
-Mongoose.connect('mongodb://localhost/MyDatabase',
+mongoose.connect('mongodb://localhost/MyDatabase',
 { useNewUrlParser: true, useUnifiedTopology: true});
 
 /*define our data structure */
-const Schema = mangoose.Schema;
+const Schema = mongoose.Schema;
 const UserDetail = new Schema ({
     username: String, 
     password: String
 });
 /* plugin to our Schema : User Detail Schema, with username and password */
 UserDetail.plugin(passportLocalMongoose);
-const UserDetails = mongoose.model('userInfo', userDetail, 'userInfo');
+const UserDetails = mongoose.model('userInfo', UserDetail, 'userInfo');
 /* Implementing Local Authentication */
 passport.use(UserDetails.createStrategy());
 passport.serializeUser(UserDetails.serializeUser());
@@ -77,7 +77,7 @@ app.post('/login', (req,res, next)=> {
 app.get('/login',
 (req,res)=> res.sendFile('html/login.html', {root:__dirname})
 );
-app.get('/', connectEnsureLogin.ensureLoggedIn(),
+app.get('/private', connectEnsureLogin.ensureLoggedIn(),
 (req, res)=> res.sendFile('html/private.html', {root:__dirname})
 );
 app.get('/user', 
@@ -88,6 +88,10 @@ app.get('/user',
     (req, res)=> {
         req.logout(), 
         res.sendFile('html/logout.html',
-        { root:_dirname}
+        { root:__dirname}
         )
     });
+    /* Register some users 
+    UserDetails.register({username:'paul', active: false}, 'paul');
+    UserDetails.register({username:'joy', active: false}, 'joy');
+    UserDetails.register({username:'ray', active: false}, 'ray'); */
