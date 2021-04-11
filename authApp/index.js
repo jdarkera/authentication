@@ -8,8 +8,17 @@ const bodyParser = require('body-parser');
 const expressSession = require('express-session') ({
     secret: 'secret',
     resave: false,
-    saveUninitialized: false
+    /*For secure, for our purpose, we set it to false  */
+    // saveUninitialized: false,
+    saveUninitialized: true,
+    /* Adding a cookie property in the require express session function */
+cookie: {
+    secret: false, 
+/*specifies duration of cookie's life */ 
+    maxAge: 60000
+}
 });
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(expressSession);
@@ -50,6 +59,7 @@ passport.deserializeUser(UserDetails.deserializeUser());
 
 /*Routes*/
 const connectEnsureLogin = require('connect-ensure-login');
+const { Cookie } = require('express-session');
 
 /*set up a route to handle a POST request to the login path
 usethe passport.authenticate method, which attempts to authenticate with the strategy it receives as its
